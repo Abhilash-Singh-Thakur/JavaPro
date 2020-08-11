@@ -19,8 +19,7 @@ public class StudentDao {
 	private static final String del = "delete from Student where id=?;";
 
 	public Student create(Student student) throws AppException {
-		try {
-			Connection connection = ConnectionConfig.getConnection();
+		try (Connection connection = ConnectionConfig.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(insert);
 
 			preparedStatement.setInt(1, student.getId());
@@ -35,8 +34,11 @@ public class StudentDao {
 	}
 
 	public Student update(Student student) throws AppException {
-		try {
-			Connection connection = ConnectionConfig.getConnection();
+		Student studentDB = this.findOneByID(student.getId());
+		if (studentDB == null) {
+			throw new AppException("Record not found for this id: " + student.getId());
+		}
+		try (Connection connection = ConnectionConfig.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(update);
 			preparedStatement.setString(2, student.getName());
 			preparedStatement.setString(3, student.getAddress());
@@ -50,9 +52,8 @@ public class StudentDao {
 	}
 
 	public List<Student> findall() throws AppException {
-		List<Student> student = new ArrayList<Student>();
-		try {
-			Connection connection = ConnectionConfig.getConnection();
+		try (Connection connection = ConnectionConfig.getConnection()) {
+			List<Student> student = new ArrayList<Student>();
 			PreparedStatement preparedStatement = connection.prepareStatement(showAll);
 			ResultSet rs = preparedStatement.executeQuery();
 			while (rs.next()) {
@@ -71,8 +72,7 @@ public class StudentDao {
 	public Student findOneByID(int id) throws AppException {
 
 		Student student = null;
-		try {
-			Connection connection = ConnectionConfig.getConnection();
+		try (Connection connection = ConnectionConfig.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(byid);
 			preparedStatement.setInt(1, id);
 			ResultSet rs = preparedStatement.executeQuery();
@@ -90,8 +90,7 @@ public class StudentDao {
 	}
 
 	public void deleteByid(int id) throws AppException {
-		try {
-			Connection connection = ConnectionConfig.getConnection();
+		try (Connection connection = ConnectionConfig.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(del);
 			preparedStatement.setInt(1, id);
 			preparedStatement.executeUpdate();
